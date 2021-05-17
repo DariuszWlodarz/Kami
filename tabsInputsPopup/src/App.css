@@ -1,0 +1,81 @@
+.tabsWrapper {
+    width: 70vw;
+    margin: 50px auto;
+    border: 1px dotted black;
+}
+
+.tabs {
+    width: 100%;
+    display: flex;
+    align-content: center;
+    justify-content: space-around;
+    padding: 20px 0;
+}
+
+
+.tab {
+    padding: 20px;
+    border: 1px solid dimgray;
+    border-radius: 5px;
+    user-select: none;
+    cursor: pointer;
+}
+
+.content {
+    text-align: center;
+    padding: 50px;
+}
+
+.active {
+    background-color: tomato;
+}
+
+.inputs {
+    display: flex;
+    flex-direction: column;
+}
+
+.inputs * {
+    margin-bottom: 20px;
+}
+.labelcheckbox {
+    display: inline-block;
+    position: relative;
+    width: 160px;
+    user-select: none;
+}
+
+.labelcheckbox:after {
+    position: absolute;
+    right: 0;
+    top: 30%;
+    content: "";
+    display: block;
+    width: 10px;
+    height: 10px;
+    border: 1px solid red;
+}
+.labelcheckbox:before {
+    position: absolute;
+    right: 1px;
+    top: 20%;
+    content: "*";
+    width: 10px;
+    height: 10px;
+    display: none;
+}
+
+.inputcheckbox {
+display: none;
+}
+.inputcheckbox:checked + .labelcheckbox:before {
+    display:block;
+}
+.inputcheckbox:checked {
+    box-shadow: 10px 10px black;
+}
+
+
+.error {
+    color: red;
+}
