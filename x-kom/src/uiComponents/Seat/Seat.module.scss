@@ -1,0 +1,17 @@
+.seat {
+  border:1px solid black;
+  background-color: tomato;
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  cursor: pointer;
+}
+
+.reservedSeat {
+  border:1px solid black;
+  background-color: grey;
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  cursor: pointer;
+}
