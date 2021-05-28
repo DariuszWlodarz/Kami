@@ -8,8 +8,12 @@ import styles from './Reservetion.module.scss'
 const Reservation = () => {
   const [seatsData, setSeatsData] = useState([])
   const [selectedSeats, setSelectedSeats] = useState([])
-  const numberOfSeatsToReserve = useSelector(state => state.reservation.sitsToReserve)
-  const shouldBeNextToEachOther = useSelector(state => state.reservation.shouldBeNextToEachOther)
+  const [nextToEachOtherOptions, setNextToEachOtherOptions] = useState([])
+  const [validOptions, setValidOptions] = useState([])
+  const numberOfSeatsToReserveFromStore = useSelector(state => state.reservation.sitsToReserve)
+  const shouldBeNextToEachOtherFromStore = useSelector(state => state.reservation.shouldBeNextToEachOther)
+  const [shouldBeNextToEachOther, setShouldBeNextToEachOther] = useState(shouldBeNextToEachOtherFromStore)
+  const [numberOfSeatsToReserve, setNumberOfSeatsToReserve] = useState(numberOfSeatsToReserveFromStore)
   const history = useHistory()
   const dispatch = useDispatch()
   useEffect(() => {
@@ -24,33 +28,86 @@ const Reservation = () => {
           setSelectedSeats(localSave)
           localSave.forEach(item => {
             const newSeatsData = [...data]
-            newSeatsData[item.indexInDataTable].reserved = true
+            if (item.indexInDataTable) {
+              newSeatsData[item.indexInDataTable].reserved = true
+            } else {
+              const index = newSeatsData.findIndex(seat => seat.id === item.id)
+              newSeatsData[index].reserved = true
+            }
             setSeatsData(newSeatsData)
           })
         }
-        if(requested) {
+        if (requested) {
           const localRequestedSave = JSON.parse(requested)
-          const maxPossibleSeatsInRow = []
-          data.forEach((seat, index) => {
-            let previousSeat = null
-            if(index > 0) previousSeat= data[index-1]
-            if(!seat.reserved) {
-              maxPossibleSeatsInRow[index] = []
-            }
-          })
+          console.log(localRequestedSave)
+          setShouldBeNextToEachOther(localRequestedSave.shouldBeNextToEachOther)
+          setNumberOfSeatsToReserve(parseInt(localRequestedSave.numberOfSeats))
+        }
+        if (shouldBeNextToEachOther) {
+          getPossibleOptions(data)
         }
       })
 
   }, [])
 
+  const getPossibleOptions = (data) => {
+    const maxPossibleSeatsInRow = []
+    data.forEach((seat, index) => {
+      let previousSeat = null
+      if (index > 0) previousSeat = data[index - 1]
+
+      if (!maxPossibleSeatsInRow[seat.cords.x]) {
+        maxPossibleSeatsInRow[seat.cords.x] = []
+        maxPossibleSeatsInRow[seat.cords.x].push([])
+      }
+
+      if (index > 0 && seat.reserved) {
+        maxPossibleSeatsInRow[seat.cords.x].push([])
+      }
+      if (index > 0 && seat.cords.y - previousSeat.cords.y > 1) {
+        maxPossibleSeatsInRow[seat.cords.x].push([])
+      }
+      if (!seat.reserved) {
+        const option = maxPossibleSeatsInRow[seat.cords.x].length - 1
+        maxPossibleSeatsInRow[seat.cords.x][option].push(seat.id)
+      }
+
+
+    })
+    console.log(maxPossibleSeatsInRow)
+    setNextToEachOtherOptions(maxPossibleSeatsInRow)
+    validateOptions()
+  }
   const generateSeats = (data) => {
-    return data.map((item, index) => <Seat key={item.id} relatedIndex={index}
-                                           id={item.id}
-                                           posX={item.cords.x} posY={item.cords.y}
-                                           reserveSeatHandler={reserveSeat}
-                                           unreservedSeatHandler={unreservedSeat}
-                                           isReservedByUser={selectedSeats.some((selectedSeat) => selectedSeat.id === item.id)}
-                                           reserved={item.reserved}/>)
+    return data.map((item, index) => {
+      return <Seat key={item.id}
+                   relatedIndex={index}
+                   id={item.id}
+                   posX={item.cords.x} posY={item.cords.y}
+                   reserveSeatHandler={reserveSeat}
+                   unreservedSeatHandler={unreservedSeat}
+                   available={isAvailable(item.id)}
+                   isReservedByUser={selectedSeats.some((selectedSeat) => selectedSeat.id === item.id)}
+                   reserved={item.reserved}/>
+    })
+  }
+
+
+  const validateOptions = () => {
+    console.log('x', nextToEachOtherOptions)
+    if (shouldBeNextToEachOther) {
+      const validOptions = nextToEachOtherOptions.flatMap(row => {
+        return row.filter(option => option.length >= numberOfSeatsToReserve)
+      })
+      console.log(validOptions.flat())
+      console.log('2', nextToEachOtherOptions)
+      setValidOptions(validOptions)
+    }
+  }
+  const isAvailable = (id) => {
+    if (shouldBeNextToEachOther) return validOptions.flat().includes(id)
+    return true
+
   }
 
   const reserveSeat = (indexInDataTable) => {

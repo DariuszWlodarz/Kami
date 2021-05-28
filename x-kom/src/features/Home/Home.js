@@ -13,6 +13,8 @@ const Home = () => {
     event.preventDefault()
     dispatch(setSitsToReserve(parseInt(numberOfSeats)))
     dispatch(setBeNextToEachOther(shouldBeNextToEachOther))
+    localStorage.removeItem('requestedSeats')
+    localStorage.removeItem('selectedSeats')
     localStorage.setItem('requestedSeats', JSON.stringify({
       numberOfSeats: numberOfSeats,
       shouldBeNextToEachOther: shouldBeNextToEachOther
@@ -29,8 +31,9 @@ const Home = () => {
         />
         <input type="checkbox"
                defaultChecked={shouldBeNextToEachOther}
+               id="nextToEachOtherCheck"
                onChange={() => setShouldBeNextToEachOther(!shouldBeNextToEachOther)}/>
-        <label>czy maja byc obok siebie</label>
+        <label htmlFor="nextToEachOtherCheck">czy maja byc obok siebie</label>
         <button type="submit">wybierz miejsca</button>
       </form>
     </div>
